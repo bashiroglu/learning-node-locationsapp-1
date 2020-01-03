@@ -1,1 +1,10 @@
-/* for test and start script commands we don't need npm run, but for other scripts it is needed */
+const express = require('express');
+const parser = require('body-parser');
+
+const placesRouters = require('./routes/placesRoutes');
+
+const app = express();
+
+app.use(placesRouters);
+
+app.listen(3001);
