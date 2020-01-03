@@ -1,10 +1,12 @@
 const express = require('express');
 const parser = require('body-parser');
 
-const placesRouters = require('./routes/placesRoutes');
+const placesRouter = require('./routes/placesRoutes');
+const usersRouter = require('./routes/usersRoutes');
 
 const app = express();
 
-app.use(placesRouters);
+app.use('/api/v1/places', placesRouter);
+app.use('/api/v1/users', usersRouter);
 
 app.listen(3001);
