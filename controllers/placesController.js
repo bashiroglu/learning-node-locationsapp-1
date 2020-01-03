@@ -1,3 +1,5 @@
+const uuid = require('uuid/v4');
+
 const GlobalError = require('../models/GlobalError');
 
 const PLACES_STATIC_ARRAY = [
@@ -35,6 +37,22 @@ const getPlacebyUserId = (req, res, next) => {
 
   res.json({ place });
 };
+const createPlace = (req, res, next) => {
+  const { title, description, coordinates, address, creator } = req.body;
+  const createdPlace = {
+    id: uuid() /* third party function to create id */,
+    title,
+    description,
+    location: coordinates,
+    address,
+    creator
+  };
+
+  PLACES_STATIC_ARRAY.push(createdPlace);
+
+  res.status(201).json({ place: createdPlace });
+};
 
 exports.getPlacebyUserId = getPlacebyUserId;
 exports.getPlacebyPlaceId = getPlacebyPlaceId;
+exports.createPlace = createPlace;
