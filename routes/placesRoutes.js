@@ -1,5 +1,7 @@
 const express = require('express');
 
+const GlobalError = require('../models/GlobalError');
+
 const router = express.Router();
 
 const PLACES_STATIC_ARRAY = [
@@ -19,11 +21,22 @@ const PLACES_STATIC_ARRAY = [
 router.get('/:placeId', (req, res, next) => {
   const placeId = req.params.placeId;
   const place = PLACES_STATIC_ARRAY.find(p => p.id === placeId);
+  if (!place) {
+    throw new GlobalError('Could not find a place for the provided id.', 404);
+  }
   res.json({ place });
 });
+
 router.get('/user/:userId', (req, res, next) => {
   const userId = req.params.userId;
   const place = PLACES_STATIC_ARRAY.find(p => p.creator === userId);
+
+  if (!place) {
+    return next(
+      new GlobalError('Could not find a place for the provided user id.', 404)
+    );
+  }
+
   res.json({ place });
 });
 
