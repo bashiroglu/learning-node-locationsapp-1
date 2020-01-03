@@ -40,7 +40,7 @@ const getPlacebyUserId = (req, res, next) => {
 const createPlace = (req, res, next) => {
   const { title, description, coordinates, address, creator } = req.body;
   const createdPlace = {
-    id: uuid() /* third party function to create id */,
+    id: uuid(),
     title,
     description,
     location: coordinates,
