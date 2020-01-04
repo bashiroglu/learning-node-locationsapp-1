@@ -19,27 +19,57 @@ let PLACES_STATIC_ARRAY = [
   }
 ];
 
-const getPlacebyPlaceId = (req, res, next) => {
+const getPlacebyPlaceId = async (req, res, next) => {
   const placeId = req.params.placeId;
-  const place = PLACES_STATIC_ARRAY.find(p => p.id === placeId);
-  if (!place) {
-    throw new GlobalError('Could not find a place for the provided id.', 404);
-  }
-  res.json({ place });
-};
-
-const getPlacesbyUserId = (req, res, next) => {
-  const userId = req.params.userId;
-  const places = PLACES_STATIC_ARRAY.filter(p => p.creator === userId);
-
-  if (!places || places.length === 0) {
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
     return next(
-      new GlobalError('Could not find a place for the provided user id.', 404)
+      new GlobalError('Something went wrong, could not find a place.', 500)
     );
   }
 
-  res.json({ places });
+  if (!place) {
+    const error = new GlobalError(
+      'Could not find a place for the provided id.',
+      404
+    );
+    return next(error);
+  }
+
+  res.json({
+    place: place.toObject({ getters: true })
+  }); /*  in here we say that we
+   want place as a object and by saying getters true, we say brind id in 
+   name of id without _ */
 };
+
+const getPlacesbyUserId = async (req, res, next) => {
+  const userId = req.params.userId;
+  let places;
+  try {
+    places = await Place.find({ creator: userId });
+  } catch (err) {
+    const error = new GlobalError(
+      'Fetching places failed, please try again later',
+      500
+    );
+    return next(error);
+  }
+
+  if (!places || places.length === 0) {
+    return next(
+      new GlobalError('Could not find places for the provided user id.', 404)
+    );
+  }
+
+  res.json({
+    places: places.map(place => place.toObject({ getters: true }))
+  }); /* because 
+  this map we loop and convert or impliment the same code each element of array */
+};
+
 const createPlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -77,21 +107,7 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({ place: createdPlace });
 };
 
-const updatePlace = (req, res, next) => {
-  const { title, description } = req.body;
-  const placeId = req.params.placeId;
-
-  const placeToUpdate = { ...PLACES_STATIC_ARRAY.find(p => p.id === placeId) };
-  const IndexOfPlaceToUpdate = PLACES_STATIC_ARRAY.findIndex(
-    p => p.id === placeId
-  );
-  if (title) placeToUpdate.title = title;
-  if (description) placeToUpdate.description = description;
-  PLACES_STATIC_ARRAY[IndexOfPlaceToUpdate] = placeToUpdate;
-
-  res.status(201).json({ place: placeToUpdate });
-};
-const deletePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     throw new GlobalError(
@@ -99,17 +115,53 @@ const deletePlace = (req, res, next) => {
       422
     );
   }
+
+  const { title, description } = req.body;
   const placeId = req.params.placeId;
 
-  if (!PLACES_STATIC_ARRAY.find(p => p.id === placeId)) {
-    throw new GlobalError(
-      'Could not find a place for that id. Deleting faild',
-      404
+  let placeToUpdate;
+  try {
+    placeToUpdate = await Place.findById(placeId);
+  } catch (err) {
+    return next(
+      new GlobalError('Something went wrong, could not update place.', 500)
     );
   }
 
-  PLACES_STATIC_ARRAY = PLACES_STATIC_ARRAY.filter(p => p.id !== placeId);
-  res.status(204).json({ message: 'deleted' });
+  placeToUpdate.title = title;
+  placeToUpdate.description = description;
+
+  try {
+    await placeToUpdate.save();
+  } catch (err) {
+    return next(
+      new GlobalError('Something went wrong, could not update place.', 500)
+    );
+  }
+
+  res.status(200).json({ place: placeToUpdate.toObject({ getters: true }) });
+};
+const deletePlace = async (req, res, next) => {
+  const placeId = req.params.placeId;
+  let place;
+  ``;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    return next(
+      new GlobalError('Something went wrong, could not delete place.', 500)
+    );
+  }
+
+  try {
+    await place.remove();
+  } catch (err) {
+    return next(
+      new GlobalError('Something went wrong, could not delete place.', 500)
+    );
+  }
+
+  res.status(200).json({ message: 'Deleted place.' });
 };
 exports.getPlacesbyUserId = getPlacesbyUserId;
 exports.getPlacebyPlaceId = getPlacebyPlaceId;
