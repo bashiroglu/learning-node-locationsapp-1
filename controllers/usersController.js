@@ -1,5 +1,6 @@
 const uuid = require('uuid/v4');
 const GlobalError = require('../models/GlobalError');
+const { validationResult } = require('express-validator');
 
 const USERS_STATIC_ARRAY = [
   {
@@ -15,6 +16,13 @@ const getUsers = (req, res, next) => {
 };
 
 const signup = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new GlobalError(
+      'Invalid inputs passed, please check your data.',
+      422
+    );
+  } /* this f. will detect we have validation error from routes or not */
   const { name, email, password } = req.body;
 
   const hasUser = USERS_STATIC_ARRAY.find(u => u.email === email);

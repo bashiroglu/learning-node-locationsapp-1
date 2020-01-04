@@ -1,4 +1,5 @@
 const uuid = require('uuid/v4');
+const { validationResult } = require('express-validator');
 
 const GlobalError = require('../models/GlobalError');
 
@@ -38,6 +39,10 @@ const getPlacesbyUserId = (req, res, next) => {
   res.json({ places });
 };
 const createPlace = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new GlobalError('Invalid inputs passed, please check your data.', 422);
+  }
   const { title, description, coordinates, address, creator } = req.body;
   const createdPlace = {
     id: uuid(),
@@ -68,10 +73,20 @@ const updatePlace = (req, res, next) => {
   res.status(201).json({ place: placeToUpdate });
 };
 const deletePlace = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new GlobalError('Invalid inputs passed, please check your data.', 422);
+  }/* we give req object to validationResult to check */
   const placeId = req.params.placeId;
 
-  PLACES_STATIC_ARRAY = PLACES_STATIC_ARRAY.filter(p => p.id !== placeId);
+  if (!PLACES_STATIC_ARRAY.find(p => p.id === placeId)) {
+    throw new GlobalError(
+      'Could not find a place for that id. Deleting faild',
+      404
+    );
+  }
 
+  PLACES_STATIC_ARRAY = PLACES_STATIC_ARRAY.filter(p => p.id !== placeId);
   res.status(204).json({ message: 'deleted' });
 };
 exports.getPlacesbyUserId = getPlacesbyUserId;
