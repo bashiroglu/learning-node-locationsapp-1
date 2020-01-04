@@ -2,6 +2,7 @@ const uuid = require('uuid/v4');
 const { validationResult } = require('express-validator');
 
 const GlobalError = require('../models/GlobalError');
+const getCoordinatesOfGivenAddress = require('../utils/location');
 
 let PLACES_STATIC_ARRAY = [
   {
@@ -38,12 +39,22 @@ const getPlacesbyUserId = (req, res, next) => {
 
   res.json({ places });
 };
-const createPlace = (req, res, next) => {
+const createPlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new GlobalError('Invalid inputs passed, please check your data.', 422);
+    return next(
+      new GlobalError('Invalid inputs passed, please check your data.', 422)
+    );
   }
-  const { title, description, coordinates, address, creator } = req.body;
+  const { title, description, address, creator } = req.body;
+
+  let coordinates;
+  try {
+    coordinates = await getCoordinatesOfGivenAddress(address);
+  } catch (error) {
+    return next(error);
+  }
+
   const createdPlace = {
     id: uuid(),
     title,
@@ -75,8 +86,11 @@ const updatePlace = (req, res, next) => {
 const deletePlace = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new GlobalError('Invalid inputs passed, please check your data.', 422);
-  }/* we give req object to validationResult to check */
+    throw new GlobalError(
+      'Invalid inputs passed, please check your data.',
+      422
+    );
+  } /* we give req object to validationResult to check */
   const placeId = req.params.placeId;
 
   if (!PLACES_STATIC_ARRAY.find(p => p.id === placeId)) {
