@@ -1,19 +1,13 @@
 const express = require('express');
 
+const usersController = require('../controllers/usersController');
+
 const router = express.Router();
 
-const USERS_STATIC_ARRAY = [
-  {
-    id: 'u1',
-    name: 'Hasan',
-    surname: 'AgaMirza'
-  }
-];
+router.get('/', usersController.getUsers);
 
-router.get('/:userId', (req, res, next) => {
-  const userId = req.params.userId;
-  const user = USERS_STATIC_ARRAY.find(user => user.id === userId);
-  res.json({ user });
-});
+router.post('/signup', usersController.signup);
+
+router.post('/login', usersController.login);
 
 module.exports = router;

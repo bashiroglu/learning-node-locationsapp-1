@@ -15,7 +15,7 @@ app.use('/api/v1/users', usersRouter);
 app.use((req, res, next) => {
   const error = new GlobalError('Could not find this route.', 404);
   throw error;
-}); /* if any of this routes don't reply, this error will work */
+}); 
 
 app.use((error, req, res, next) => {
   if (res.headerSent) {
