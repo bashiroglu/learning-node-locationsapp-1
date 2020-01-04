@@ -34,9 +34,9 @@ const getPlacebyPlaceId = async (req, res, next) => {
 
 const getPlacesbyUserId = async (req, res, next) => {
   const userId = req.params.userId;
-  let places;
+  let userWithPlaces;
   try {
-    places = await Place.find({ creator: userId });
+    userWithPlaces = await User.findById(userId).populate('places');
   } catch (err) {
     const error = new GlobalError(
       'Fetching places failed, please try again later',
@@ -45,16 +45,17 @@ const getPlacesbyUserId = async (req, res, next) => {
     return next(error);
   }
 
-  if (!places || places.length === 0) {
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
     return next(
       new GlobalError('Could not find places for the provided user id.', 404)
     );
   }
 
   res.json({
-    places: places.map(place => place.toObject({ getters: true }))
-  }); /* because 
-  this map we loop and convert or impliment the same code each element of array */
+    places: userWithPlaces.places.map(place =>
+      place.toObject({ getters: true })
+    )
+  });
 };
 
 const createPlace = async (req, res, next) => {
