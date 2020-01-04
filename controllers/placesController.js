@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator');
 
 const GlobalError = require('../models/GlobalError');
 const getCoordinatesOfGivenAddress = require('../utils/location');
+const Place = require('../models/place');
 
 let PLACES_STATIC_ARRAY = [
   {
@@ -55,16 +56,23 @@ const createPlace = async (req, res, next) => {
     return next(error);
   }
 
-  const createdPlace = {
-    id: uuid(),
+  const createdPlace = new Place({
     title,
     description,
-    location: coordinates,
     address,
+    location: coordinates,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/400px-Empire_State_Building_%28aerial_view%29.jpg',
     creator
-  };
+  });
 
-  PLACES_STATIC_ARRAY.push(createdPlace);
+  try {
+    await createdPlace.save();
+  } catch (err) {
+    return next(
+      new GlobalError('Creating place failed, please try again.', 500)
+    );
+  }
 
   res.status(201).json({ place: createdPlace });
 };
@@ -90,7 +98,7 @@ const deletePlace = (req, res, next) => {
       'Invalid inputs passed, please check your data.',
       422
     );
-  } /* we give req object to validationResult to check */
+  }
   const placeId = req.params.placeId;
 
   if (!PLACES_STATIC_ARRAY.find(p => p.id === placeId)) {
