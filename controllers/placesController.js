@@ -1,23 +1,10 @@
-const uuid = require('uuid/v4');
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 
 const GlobalError = require('../models/GlobalError');
 const getCoordinatesOfGivenAddress = require('../utils/location');
 const Place = require('../models/place');
-
-let PLACES_STATIC_ARRAY = [
-  {
-    id: 'p1',
-    title: 'Empire State Building',
-    description: 'One of the most famous sky scrapers in the world!',
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516
-    },
-    address: '20 W 34th St, New York, NY 10001',
-    creator: 'u1'
-  }
-];
+const User = require('../models/user');
 
 const getPlacebyPlaceId = async (req, res, next) => {
   const placeId = req.params.placeId;
@@ -96,12 +83,37 @@ const createPlace = async (req, res, next) => {
     creator
   });
 
+  let user;
   try {
-    await createdPlace.save();
+    user = await User.findById(creator);
   } catch (err) {
-    return next(
-      new GlobalError('Creating place failed, please try again.', 500)
+    const error = new GlobalError(
+      'Creating place failed, please try again',
+      500
     );
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new GlobalError('Could not find user for provided id', 404);
+    return next(error);
+  }
+
+  console.log(user);
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdPlace.save({ session: sess });
+    user.places.push(createdPlace);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    const error = new GlobalError(
+      'Creating place failed, please try again.',
+      500
+    );
+    return next(error);
   }
 
   res.status(201).json({ place: createdPlace });

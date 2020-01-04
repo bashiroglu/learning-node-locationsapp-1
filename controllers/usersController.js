@@ -14,7 +14,7 @@ const getUsers = async (req, res, next) => {
     );
     return next(error);
   }
-  res.json({users: users.map(user => user.toObject({ getters: true }))});
+  res.json({ users: users.map(user => user.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
@@ -24,11 +24,11 @@ const signup = async (req, res, next) => {
       new GlobalError('Invalid inputs passed, please check your data.', 422)
     );
   }
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
-  let existingUser
+  let existingUser;
   try {
-    existingUser = await User.findOne({ email })
+    existingUser = await User.findOne({ email });
   } catch (err) {
     const error = new GlobalError(
       'Signing up failed, please try again later.',
@@ -36,7 +36,7 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
-  
+
   if (existingUser) {
     const error = new GlobalError(
       'User exists already, please login instead.',
@@ -44,26 +44,24 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
-  
+
   const createdUser = new User({
     name,
     email,
     image: 'https://live.staticflickr.com/7631/26849088292_36fc52ee90_b.jpg',
     password,
-    places
+    places: [] /* when user register
+    user won't have any places */
   });
 
   try {
     await createdUser.save();
   } catch (err) {
-    const error = new GlobalError(
-      'Signing up failed, please try again.',
-      500
-    );
+    const error = new GlobalError('Signing up failed, please try again.', 500);
     return next(error);
   }
 
-  res.status(201).json({user: createdUser.toObject({ getters: true })});
+  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
 const login = async (req, res, next) => {
@@ -72,7 +70,7 @@ const login = async (req, res, next) => {
   let existingUser;
 
   try {
-    existingUser = await User.findOne({ email })
+    existingUser = await User.findOne({ email });
   } catch (err) {
     const error = new GlobalError(
       'Logging in failed, please try again later.',
@@ -89,7 +87,7 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({message: 'Logged in!'});
+  res.json({ message: 'Logged in!' });
 };
 
 exports.getUsers = getUsers;
