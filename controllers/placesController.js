@@ -2,7 +2,7 @@ const uuid = require('uuid/v4');
 
 const GlobalError = require('../models/GlobalError');
 
-const PLACES_STATIC_ARRAY = [
+let PLACES_STATIC_ARRAY = [
   {
     id: 'p1',
     title: 'Empire State Building',
@@ -25,17 +25,17 @@ const getPlacebyPlaceId = (req, res, next) => {
   res.json({ place });
 };
 
-const getPlacebyUserId = (req, res, next) => {
+const getPlacesbyUserId = (req, res, next) => {
   const userId = req.params.userId;
-  const place = PLACES_STATIC_ARRAY.find(p => p.creator === userId);
+  const places = PLACES_STATIC_ARRAY.filter(p => p.creator === userId);
 
-  if (!place) {
+  if (!places || places.length === 0) {
     return next(
       new GlobalError('Could not find a place for the provided user id.', 404)
     );
   }
 
-  res.json({ place });
+  res.json({ places });
 };
 const createPlace = (req, res, next) => {
   const { title, description, coordinates, address, creator } = req.body;
@@ -53,6 +53,29 @@ const createPlace = (req, res, next) => {
   res.status(201).json({ place: createdPlace });
 };
 
-exports.getPlacebyUserId = getPlacebyUserId;
+const updatePlace = (req, res, next) => {
+  const { title, description } = req.body;
+  const placeId = req.params.placeId;
+
+  const placeToUpdate = { ...PLACES_STATIC_ARRAY.find(p => p.id === placeId) };
+  const IndexOfPlaceToUpdate = PLACES_STATIC_ARRAY.findIndex(
+    p => p.id === placeId
+  );
+  if (title) placeToUpdate.title = title;
+  if (description) placeToUpdate.description = description;
+  PLACES_STATIC_ARRAY[IndexOfPlaceToUpdate] = placeToUpdate;
+
+  res.status(201).json({ place: placeToUpdate });
+};
+const deletePlace = (req, res, next) => {
+  const placeId = req.params.placeId;
+
+  PLACES_STATIC_ARRAY = PLACES_STATIC_ARRAY.filter(p => p.id !== placeId);
+
+  res.status(204).json({ message: 'deleted' });
+};
+exports.getPlacesbyUserId = getPlacesbyUserId;
 exports.getPlacebyPlaceId = getPlacebyPlaceId;
 exports.createPlace = createPlace;
+exports.updatePlace = updatePlace;
+exports.deletePlace = deletePlace;
