@@ -1,4 +1,3 @@
-const uuid = require('uuid/v4');
 const GlobalError = require('../models/GlobalError');
 const { validationResult } = require('express-validator');
 const User = require('../models/user');
@@ -50,8 +49,7 @@ const signup = async (req, res, next) => {
     email,
     image: 'https://live.staticflickr.com/7631/26849088292_36fc52ee90_b.jpg',
     password,
-    places: [] /* when user register
-    user won't have any places */
+    places: []
   });
 
   try {
