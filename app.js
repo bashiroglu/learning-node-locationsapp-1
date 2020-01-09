@@ -37,12 +37,21 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || 'An unknown error occurred!' });
 });
 
+// mongoose
+//   .connect(
+//     'mongodb+srv://bashiroghlu:bashiroghlu123@cluster0-vgrdu.mongodb.net/test?retryWrites=true&w=majority'
+//     // 'mongodb+srv://bashiroghlu:bashiroghlu123@cluster0-vga0n.mongodb.net/places?retryWrites=true&w=majority'
+//   )
+//   .then(() => {
+//     app.listen(3001);
+//   })
+
 mongoose
-  .connect(
-    'mongodb+srv://bashiroghlu:bashiroghlu123@cluster0-vgrdu.mongodb.net/test?retryWrites=true&w=majority'
-    // 'mongodb+srv://bashiroghlu:bashiroghlu123@cluster0-vga0n.mongodb.net/places?retryWrites=true&w=majority'
-  )
+  .connect('mongodb://localhost:27017/locationapp')
   .then(() => {
     app.listen(3001);
+  })
+  .then(() => {
+    console.log('successful connections with db');
   })
   .catch(error => console.log(error));
