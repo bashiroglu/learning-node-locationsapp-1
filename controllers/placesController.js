@@ -176,12 +176,15 @@ const deletePlace = async (req, res, next) => {
   }
 
   try {
-    const sess = await mongoose.startSession();
-    sess.startTransaction();
-    await place.remove({ session: sess });
+    // const sess = await mongoose.startSession();
+    // sess.startTransaction();
+    // await place.remove({ session: sess });
+    // place.creator.places.pull(place);
+    // await place.creator.save({ session: sess });
+    // await sess.commitTransaction();
+    await place.remove(/* { session: session } */);
     place.creator.places.pull(place);
-    await place.creator.save({ session: sess });
-    await sess.commitTransaction();
+    await place.creator.save(/* { session: session } */);
   } catch (err) {
     const error = new GlobalError(
       'Something went wrong, could not delete place.',
