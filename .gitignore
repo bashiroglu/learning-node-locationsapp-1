@@ -5,4 +5,5 @@
 /.pnp
 .pnp.js
 
+/uploads
 *.env
