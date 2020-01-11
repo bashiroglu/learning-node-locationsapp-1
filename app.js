@@ -45,9 +45,14 @@ app.use((error, req, res, next) => {
 //   .then(() => {
 //     app.listen(3001);
 //   })
+const connectConfig = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true
+};
 
 mongoose
-  .connect('mongodb://localhost:27017/locationapp')
+  .connect('mongodb://localhost:27017/locationapp', connectConfig)
   .then(() => {
     app.listen(3001);
   })

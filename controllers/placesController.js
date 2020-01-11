@@ -65,6 +65,7 @@ const createPlace = async (req, res, next) => {
       new GlobalError('Invalid inputs passed, please check your data.', 422)
     );
   }
+
   const { title, description, address, creator } = req.body;
 
   let coordinates;
@@ -80,7 +81,7 @@ const createPlace = async (req, res, next) => {
     address,
     location: coordinates,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/400px-Empire_State_Building_%28aerial_view%29.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/400px-Empire_State_Building_%28aerial_view%29.jpg', // => File Upload module, will be replaced with real image url
     creator
   });
 
@@ -89,26 +90,29 @@ const createPlace = async (req, res, next) => {
     user = await User.findById(creator);
   } catch (err) {
     const error = new GlobalError(
-      'Creating place failed, please try again',
+      'Creating place failed, please try again.',
       500
     );
     return next(error);
   }
 
   if (!user) {
-    const error = new GlobalError('Could not find user for provided id', 404);
+    const error = new GlobalError('Could not find user for provided id.', 404);
     return next(error);
   }
 
   console.log(user);
 
   try {
-    const sess = await mongoose.startSession();
-    sess.startTransaction();
-    await createdPlace.save({ session: sess });
+    await createdPlace.save();
     user.places.push(createdPlace);
-    await user.save({ session: sess });
-    await sess.commitTransaction();
+    await user.save();
+    // const sess = await mongoose.startSession();
+    // sess.startTransaction();
+    // await createdPlace.save({ session: sess });
+    // user.places.push(createdPlace);
+    // await user.save({ session: sess });
+    // await sess.commitTransaction();
   } catch (err) {
     const error = new GlobalError(
       'Creating place failed, please try again.',
