@@ -83,7 +83,6 @@ const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   let existingUser;
-
   try {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
@@ -94,7 +93,26 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  if (!existingUser || existingUser.password !== password) {
+  if (!existingUser) {
+    const error = new GlobalError(
+      'Invalid credentials, could not log you in.',
+      401
+    );
+    return next(error);
+  }
+
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (err) {
+    const error = new GlobalError(
+      'Could not log you in, please check your credentials and try again.',
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
     const error = new GlobalError(
       'Invalid credentials, could not log you in.',
       401
