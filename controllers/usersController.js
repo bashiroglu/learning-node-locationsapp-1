@@ -51,7 +51,7 @@ const signup = async (req, res, next) => {
   try {
     hashedPassword = await bcrypt.hash(password, 12);
   } catch (err) {
-    const error = new HttpError(
+    const error = new GlobalError(
       'Could not create user, please try again.',
       500
     );
