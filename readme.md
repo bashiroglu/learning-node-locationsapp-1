@@ -11,11 +11,10 @@ Used Language concepts:
 
 Addable features:
 
-1.
-2.
+1. 2.
 
 After download project files, in the project directory, you can run :
 
 ### `npm start`
 
-# please also add images folder to uploads folder
+# please also add /uploads/images folder to main dir
