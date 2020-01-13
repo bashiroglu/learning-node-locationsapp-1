@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 
 const GlobalError = require('../models/GlobalError');
+const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/user');
 
@@ -33,7 +34,7 @@ const signup = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new GlobalError(
-      'Signing up failed, please try again later.',
+      'Signing up failed, please try again later.1',
       500
     );
     return next(error);
@@ -70,7 +71,7 @@ const signup = async (req, res, next) => {
     await createdUser.save();
   } catch (err) {
     const error = new GlobalError(
-      'Signing up failed, please try again later.',
+      'Signing up failed, please try again later.2',
       500
     );
     return next(error);
@@ -85,7 +86,7 @@ const signup = async (req, res, next) => {
     );
   } catch (err) {
     const error = new GlobalError(
-      'Signing up failed, please try again later.',
+      'Signing up failed, please try again later.3',
       500
     );
     return next(error);
@@ -104,7 +105,7 @@ const login = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new GlobalError(
-      'Loggin in failed, please try again later.',
+      'Logging in failed, please try again later.',
       500
     );
     return next(error);
