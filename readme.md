@@ -17,3 +17,5 @@ Addable features:
 After download project files, in the project directory, you can run :
 
 ### `npm start`
+
+# please also add images folder to uploads folder
